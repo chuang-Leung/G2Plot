@@ -1,5 +1,6 @@
 import { isString } from '@antv/util';
 import { interaction, animation, theme, scale, annotation } from '../../adaptor/common';
+import { interval } from '../../adaptor/geometries';
 import { AXIS_META_CONFIG_KEYS } from '../../constant';
 import { Params } from '../../core/adaptor';
 import { Data } from '../../types';
@@ -22,7 +23,7 @@ import { getIndicatorData, getRangeData } from './utils';
  */
 function geometry(params: Params<GaugeOptions>): Params<GaugeOptions> {
   const { chart, options } = params;
-  const { percent, range, radius, innerRadius, startAngle, endAngle, axis, indicator } = options;
+  const { percent, range, radius, innerRadius, startAngle, endAngle, axis, indicator, gaugeStyle } = options;
   const { color } = range;
 
   // 指标 & 指针
@@ -61,7 +62,22 @@ function geometry(params: Params<GaugeOptions>): Params<GaugeOptions> {
 
   const rangeColor = isString(color) ? [color, DEFAULT_COLOR] : color;
 
-  v2.interval().position(`1*${RANGE_VALUE}`).color(RANGE_TYPE, rangeColor).adjust('stack');
+  interval({
+    chart: v2,
+    options: {
+      xField: '1',
+      yField: RANGE_VALUE,
+      seriesField: RANGE_TYPE,
+      isStack: true,
+      interval: {
+        color: rangeColor,
+        style: gaugeStyle,
+      },
+      args: {
+        zIndexReversed: true,
+      },
+    },
+  });
 
   v2.coordinate('polar', {
     innerRadius,
